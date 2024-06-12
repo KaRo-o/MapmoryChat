@@ -28,6 +28,7 @@ const ChatList = () => {
   };
 
   //유저 아이디 가져오기
+  //adsf
   const axiosGetUser = async () => {
     try {
       await axios
