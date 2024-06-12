@@ -52,6 +52,7 @@ const Chat = () => {
   }, [room]);
 
   // 현재 채팅방의 모든 메시지 가져오기
+  //sdfadsf
   const getAllMessages = async () => {
     try {
       await axios
