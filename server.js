@@ -26,7 +26,8 @@ const ioo = new Server(server, {
   },
 });
 
-const socket = io("http://192.168.0.45:3001");
+// const socket = io("http://192.168.0.45:3001");
+const socket = io("https://mapmory.co.kr");
 
 // CORS 미들웨어 설정
 app.use(cors());
@@ -35,7 +36,8 @@ app.use(express.json()); // JSON 바디 파싱
 app.use(express.static("public"));
 
 (function async() {
-  axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
+  // axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
+  axios.get("https://mapmory.co.kr/chat/json/getMongo").then((res) => {
     console.log(res.data);
     // MongoDB 연결 설정
     mongoose

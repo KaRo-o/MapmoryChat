@@ -2,7 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://192.168.0.45:3001"); // 서버 주소 확인
+// const socket = io("http://192.168.0.45:3001"); // 서버 주소 확인
+const socket = io("https://mapmory.co.kr"); // 서버 주소 확인
 
 const ChatList = () => {
   const [list, setList] = useState([]);
@@ -17,7 +18,8 @@ const ChatList = () => {
   const axiosGetChatList = async (user) => {
     try {
       await axios
-        .post("http://192.168.0.45:3001/mongo/chatRoomList", {
+        // .post("http://192.168.0.45:3001/mongo/chatRoomList", {
+        .post("https://mapmory.co.kr/mongo/chatRoomList", {
           userId: user,
         })
         .then((res) => {
@@ -34,7 +36,8 @@ const ChatList = () => {
   const axiosGetUser = async () => {
     try {
       await axios
-        .get("http://192.168.0.45:8000/chat/json/getUser", {
+        // .get("http://192.168.0.45:8000/chat/json/getUser", {
+        .get("https://mapmory.co.kr/chat/json/getUser", {
           withCredentials: true,
         })
         .then((res) => {
