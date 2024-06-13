@@ -3,6 +3,12 @@ import { Route, Routes } from "react-router-dom";
 import Chat from "./chat/Chat";
 import ChatList from "./chat/ChatList";
 
+const path = require("path");
+const express = require("express");
+const app = express();
+
+app.use(express.static(path.join(__dirname, "build")));
+
 function App() {
   return (
     <div>
