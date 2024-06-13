@@ -8,11 +8,6 @@ const { io } = require("socket.io-client");
 const { useNavigate } = require("react-router-dom");
 const path = require("path");
 
-const path = require("path");
-const express = require("express");
-
-app.use(express.static(path.join(__dirname, "build")));
-
 const app = express();
 const server = http.createServer(app);
 const ioo = new Server(server, {
@@ -31,6 +26,8 @@ const ioo = new Server(server, {
     credentials: true,
   },
 });
+
+app.use(express.static(path.join(__dirname, "build")));
 
 // const socket = io("http://192.168.0.45:3001");
 const socket = io("https://mapmory.co.kr");
