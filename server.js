@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const { default: axios } = require("axios");
 const { io } = require("socket.io-client");
 const { useNavigate } = require("react-router-dom");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
@@ -34,6 +35,8 @@ app.use(cors());
 app.use(express.json()); // JSON 바디 파싱
 
 app.use(express.static("public"));
+
+app.use(express.static(path.join(__dirname, "build")));
 
 (function async() {
   // axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
