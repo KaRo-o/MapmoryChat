@@ -5,7 +5,6 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const { default: axios } = require("axios");
 const { io } = require("socket.io-client");
-const { useNavigate } = require("react-router-dom");
 const path = require("path");
 
 const app = express();
@@ -45,8 +44,8 @@ app.use(express.static("public"));
     // MongoDB 연결 설정
     mongoose
       .connect(res.data, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
+        // useNewUrlParser: true,
+        // useUnifiedTopology: true,
       })
       .then(() => {
         console.log("MongoDB connected...");
