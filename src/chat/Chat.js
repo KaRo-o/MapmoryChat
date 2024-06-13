@@ -66,7 +66,7 @@ const Chat = () => {
     try {
       const response = await axios.post(
         // "http://192.168.0.45:3001/mongo/getAllMessages",
-        "https://mapmory.co.kr/mongo/getAllMessages",
+        "https://mapmory.co.kr/chat/getAllMessages",
         {
           chat_room_id: chat_room_id,
         }

@@ -19,7 +19,7 @@ const ChatList = () => {
     try {
       await axios
         // .post("http://192.168.0.45:3001/mongo/chatRoomList", {
-        .post("https://mapmory.co.kr/mongo/chatRoomList", {
+        .post("https://mapmory.co.kr/chat/chatRoomList", {
           userId: user,
         })
         .then((res) => {
