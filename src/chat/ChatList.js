@@ -19,7 +19,7 @@ const ChatList = () => {
     try {
       await axios
         // .post("http://192.168.0.45:3001/mongo/chatRoomList", {
-        .post("https://mapmory.co.kr/chat/chatRoomList", {
+        .post("https://mapmory.co.kr/chatting/chatRoomList", {
           userId: user,
         })
         .then((res) => {
@@ -67,7 +67,7 @@ const ChatList = () => {
               <tr>
                 <td>{index + 1}</td>
                 <td>
-                  <a href={`/chat/chatroom/${chatList._id}`}>
+                  <a href={`/chatting/chatroom/${chatList._id}`}>
                     {chatList.participants[0]}
                   </a>
                 </td>

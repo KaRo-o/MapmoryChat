@@ -178,7 +178,7 @@ server.listen(3001, () => {
 });
 
 //채팅방 있는지 조회 후 없으면 채팅방 생성
-app.post("/chat/findOneChatRoom", async (req, res) => {
+app.post("/chatting/findOneChatRoom", async (req, res) => {
   const { userId, opponent } = req.body;
   console.log(userId, " : ", opponent);
   try {
@@ -217,7 +217,7 @@ app.post("/chat/findOneChatRoom", async (req, res) => {
 });
 
 //채팅방 만들기 (채팅방 존재여부 확인하면서 한번에 처리)
-app.post("/chat/makeChatRoom", async (req, res) => {
+app.post("/chatting/makeChatRoom", async (req, res) => {
   const { userId, opponent } = req.body;
   try {
     socket.emit("make room", {
@@ -229,7 +229,7 @@ app.post("/chat/makeChatRoom", async (req, res) => {
 });
 
 //현재 로그인한 유저의 채팅방 리스트 조회
-app.post("/chat/chatRoomList", async (req, res) => {
+app.post("/chatting/chatRoomList", async (req, res) => {
   const { userId } = req.body;
   try {
     const chatRoomList = await Chat.find({ participants: userId });
@@ -253,7 +253,7 @@ app.post("/chat/chatRoomList", async (req, res) => {
 });
 
 //특정채팅방 메시지 조회
-app.post("/chat/getAllMessages", async (req, res) => {
+app.post("/chatting/getAllMessages", async (req, res) => {
   const { chat_room_id } = req.body;
   try {
     const messages = await Message.find({ chatId: chat_room_id });

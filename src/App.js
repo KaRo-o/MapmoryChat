@@ -7,10 +7,10 @@ function App() {
   return (
     <div>
       <Routes>
-        <Route path="/chat/chatlist" element={<ChatList />} />
-        <Route path="/chat/chatroom/:chat_room_id" element={<Chat />} />
+        <Route path="/chatting/chatlist" element={<ChatList />} />
+        <Route path="/chatting/chatroom/:chat_room_id" element={<Chat />} />
       </Routes>
-      <a href="/chat/chatList">chatList</a>
+      <a href="/chatting/chatList">chatList</a>
     </div>
   );
 }
