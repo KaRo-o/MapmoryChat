@@ -16,14 +16,15 @@ const Chat = () => {
   //유저 아이디 가져오기
   const axiosGetUser = async () => {
     try {
-      await axios
-        .get("http://192.168.0.45:8000/chat/json/getUser", {
+      const response = await axios.get(
+        "http://192.168.0.45:8000/chat/json/getUser",
+        {
           withCredentials: true,
-        })
-        .then((res) => {
-          console.log("getUser");
-          setUserId(res.data);
-        });
+        }
+      );
+      console.log("getUser", response.data);
+      setUserId(response.data);
+      return response.data;
     } catch (error) {
       console.error(error);
     }
@@ -35,9 +36,16 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    axiosGetUser();
-    socket.emit("joinChat", room);
+    axiosGetUser().then((res) => {
+      const user = res;
+      console.log("getUser", res);
+      socket.emit("joinChat", { room, user });
+    });
+
     socket.on("chat message", (msg) => {
+      // const user = userId;
+      // console.log("chat mes", user);
+      // socket.emit("is read", { room, user });
       console.log("chat message");
       setMessages((prevMessages) => [...prevMessages, msg]);
     });
@@ -45,39 +53,37 @@ const Chat = () => {
       console.log("prev message");
       setMessages((prevMessages) => [...msgs, ...prevMessages]);
     });
-  }, [room]);
+  }, []);
 
   useEffect(() => {
     getAllMessages();
   }, [room]);
 
   // 현재 채팅방의 모든 메시지 가져오기
-  //sdfadsf
   const getAllMessages = async () => {
     try {
-      await axios
-        .post("http://192.168.0.45:3001/mongo/getAllMessages", {
+      const response = await axios.post(
+        "http://192.168.0.45:3001/mongo/getAllMessages",
+        {
           chat_room_id: chat_room_id,
-        })
-        .then((res) => {
-          console.log("getAll");
-          console.log(typeof res.data.timestamp);
-          console.log(res.data);
-          setMessages(res.data);
-        });
+        }
+      );
+      console.log("getAll", response.data);
+      setMessages(response.data);
     } catch (error) {
       console.error(error);
     }
-    // getAllMessages();
   };
 
   //채팅 전송
   const sendMessage = () => {
-    if (input || userId !== "") {
+    if (input || userId === "") {
       socket.emit("chat message", {
         chatId: chat_room_id,
         senderId: userId,
         text: input,
+        imageUrl: null,
+        readBy: [],
       });
       setInput("");
     } else {
@@ -87,7 +93,6 @@ const Chat = () => {
 
   //타임스탬프 parse
   const parseTimeStamp = (timestamp) => {
-    // console.log(typeof timestamp);
     const t = timestamp.indexOf("T");
     const dot = timestamp.lastIndexOf(":");
     const parseTime = timestamp.substring(t + 1, dot);
@@ -119,12 +124,67 @@ const Chat = () => {
     setImageList([...imageList, ...e.target.files]);
   };
 
+  //이미지 업로드
+  const axiosImageUpload = async () => {
+    const formData = new FormData();
+
+    imageList.forEach((image) => {
+      console.log(image);
+      formData.append("files", image);
+    });
+
+    formData.append("chatId", chat_room_id);
+
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    };
+
+    try {
+      const response = await axios
+        .post(
+          "http://192.168.0.45:8000/chat/json/addChatImage",
+          formData,
+          config
+        )
+        .then((res) => {
+          console.log(res.data);
+          res.data.forEach((imageurl) => {
+            console.log("imageUrl :", imageurl);
+            socket.emit("chat message", {
+              chatId: chat_room_id,
+              senderId: userId,
+              imageUrl: imageurl,
+              text: null,
+              readBy: [],
+            });
+          });
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  //메시지 읽음 여부
+  useEffect(() => {
+    const user = userId;
+    socket.emit("is read", { room, user });
+  }, [messages]);
+
+  socket.on("is read", async (res) => {
+    const { room, user } = res;
+    console.log("front is read :", res);
+    socket.emit("is read", { room, user });
+  });
   return (
     <div>
       <ul>
         {messages.map((res, index) => (
           <li key={index}>
-            {res.senderId}:{res.text}...
+            {res.senderId}:{res.text}
+            <img alt="" src={`${res.imageUrl}`}></img>...
             {parseTimeStamp(res.timestamp)}
           </li>
         ))}
@@ -140,6 +200,7 @@ const Chat = () => {
         multiple
         onChange={onChangeImageInput}
       />
+      <button onClick={axiosImageUpload}>이미지 전송</button>
     </div>
   );
 };

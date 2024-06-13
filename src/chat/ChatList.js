@@ -1,16 +1,19 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+
+const socket = io("http://192.168.0.45:3001"); // 서버 주소 확인
 
 const ChatList = () => {
   const [list, setList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [userId, setUserId] = useState("");
+  // const [userId, setUserId] = useState("");
 
   useEffect(() => {
     axiosGetUser();
   }, []);
 
-  //채팅방 리스트 검색
+  //채팅방 리스트 가져오기
   const axiosGetChatList = async (user) => {
     try {
       await axios
@@ -28,7 +31,6 @@ const ChatList = () => {
   };
 
   //유저 아이디 가져오기
-  //adsf
   const axiosGetUser = async () => {
     try {
       await axios
@@ -36,13 +38,18 @@ const ChatList = () => {
           withCredentials: true,
         })
         .then((res) => {
-          console.log("getUser");
+          console.log("getUser", res);
           axiosGetChatList(res.data);
         });
     } catch (error) {
       console.error(error);
     }
   };
+
+  socket.on("get chat list", (res) => {
+    // console.log("get hcat", res);
+    axiosGetChatList(res);
+  });
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -51,12 +58,23 @@ const ChatList = () => {
       <div>
         <h3>채팅방 목록</h3>
         <hr />
-        {list.map((chatList, index) => (
-          <div key={index}>
-            <h3>{index + 1}</h3>
-            <a href={`/chat/${chatList._id}`}>{chatList.participants[0]}</a>
-          </div>
-        ))}
+        <table>
+          {list.map((chatList, index) => (
+            <tbody key={index}>
+              <tr>
+                <td>{index + 1}</td>
+                <td>
+                  <a href={`/chat/chatroom/${chatList._id}`}>
+                    {chatList.participants[0]}
+                  </a>
+                </td>
+                {chatList.lastMessage.text === null ? null : (
+                  <td>{chatList.lastMessage.text}</td>
+                )}
+              </tr>
+            </tbody>
+          ))}
+        </table>
         <br />
         <hr />
       </div>

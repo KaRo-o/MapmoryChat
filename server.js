@@ -5,6 +5,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const { default: axios } = require("axios");
 const { io } = require("socket.io-client");
+const { useNavigate } = require("react-router-dom");
 
 const app = express();
 const server = http.createServer(app);
@@ -15,10 +16,13 @@ const ioo = new Server(server, {
       "http://localhost:3000",
       "http://192.168.0.45:8000",
       "http://localhost:8000",
+      "http://192.168.0.24:3000",
+      "http://192.168.0.24:8000",
       "http:mapmory.co.kr",
       "https:mapmory.co.kr",
     ],
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
@@ -60,7 +64,7 @@ const messageSchema = new mongoose.Schema({
   text: String,
   imageUrl: String, // 이미지 메시지의 URL (이미지 메시지인 경우)
   timestamp: { type: Date, default: timeKR },
-  readBy: [String],
+  readBy: [String], // 읽은 사용자 아이디
 });
 
 const chatSchema = new mongoose.Schema({
@@ -85,10 +89,11 @@ const Chat = mongoose.model("Chat", chatSchema);
 
 //socket.io-client
 ioo.on("connection", (socket) => {
-  console.log("connected");
+  // console.log("connected");
 
   //채팅방 만들기
   socket.on("make room", async (roomData) => {
+    roomData.lastMessage = { text: null, timestamp: null };
     const newRoom = new Chat(roomData);
     try {
       console.log("make room try");
@@ -99,13 +104,29 @@ ioo.on("connection", (socket) => {
   });
 
   //채팅방 입장
-  socket.on("joinChat", async (roomId) => {
-    socket.join(roomId);
-    console.log(`joined room: ${roomId}`);
+  socket.on("joinChat", async (res) => {
+    // console.log("join", res);
+    const { room, user } = res;
+    socket.join(room);
+    console.log(`joined room: ${room},${user}`);
 
     try {
-      const messages = await Message.find({ chat_room_id: roomId });
+      socket.emit("is read", { room, user });
+      const messages = await Message.find({ chat_room_id: room });
       socket.emit("previousMessages", messages);
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+  socket.on("is read", async (res) => {
+    const { room, user } = res;
+    console.log("back is read", res);
+    try {
+      const isRead = await Message.updateMany(
+        { chatId: room, readBy: { $ne: user } }, // 필터에 readBy 조건 추가
+        { $addToSet: { readBy: user } }
+      );
     } catch (error) {
       console.error(error);
     }
@@ -114,9 +135,23 @@ ioo.on("connection", (socket) => {
   // 채팅 메시지 저장
   socket.on("chat message", async (msg) => {
     const message = new Message(msg);
+    // console.log(msg);
     try {
-      const newMessage = await message.save();
-      ioo.emit("chat message", newMessage);
+      await message.save().then(async (res) => {
+        ioo.emit("chat message", res);
+        // console.log(res);
+        const lastMessage = await Chat.findById(res.chatId).exec();
+        // console.log(lastMessage);
+        let text;
+        if (res.text !== null) {
+          text = res.text;
+        } else if (res.imageUrl !== null) {
+          text = "이미지";
+        }
+        lastMessage.lastMessage = { text: text, timestamp: res.timestamp };
+        await lastMessage.save();
+        ioo.emit("get chat list", res.senderId);
+      });
     } catch (error) {
       console.error(error);
     }
@@ -128,7 +163,7 @@ ioo.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("user disconnected");
+    // console.log("user disconnected");
   });
 });
 
