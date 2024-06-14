@@ -26,16 +26,12 @@ const ioo = new Server(server, {
   },
 });
 
-app.use(express.static(path.join(__dirname, "build")));
-
 // const socket = io("http://192.168.0.45:3001");
 const socket = io("https://mapmory.co.kr");
 
 // CORS 미들웨어 설정
 app.use(cors());
 app.use(express.json()); // JSON 바디 파싱
-
-app.use(express.static("public"));
 
 (function async() {
   // axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
@@ -262,9 +258,10 @@ app.post("/chatting/getAllMessages", async (req, res) => {
   }
 });
 
+// React 빌드 파일을 정적 파일로 서빙
 app.use(express.static(path.join(__dirname, "build")));
 
 // build index get????
-app.get("/*", (req, res) => {
+app.get("/chatting", (req, res) => {
   console.log(res.sendFile(path.join(__dirname, "build", "index.html")));
 });
