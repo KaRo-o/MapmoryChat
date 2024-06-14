@@ -33,6 +33,9 @@ const socket = io("https://mapmory.co.kr");
 app.use(cors());
 app.use(express.json()); // JSON 바디 파싱
 
+// React 빌드 파일을 정적 파일로 서빙
+app.use(express.static(path.join(__dirname, "build")));
+
 (function async() {
   // axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
   axios.get("https://mapmory.co.kr/chat/json/getMongo").then((res) => {
@@ -257,9 +260,6 @@ app.post("/chatting/getAllMessages", async (req, res) => {
     console.error(error);
   }
 });
-
-// React 빌드 파일을 정적 파일로 서빙
-app.use(express.static(path.join(__dirname, "build")));
 
 // build index get????
 app.get("/chatting", (req, res) => {
