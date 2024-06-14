@@ -41,8 +41,8 @@ app.use(express.json()); // JSON 바디 파싱
 app.use(express.static(path.join(__dirname, "build")));
 
 (function async() {
-  // axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
-  axios.get(`${domain}/chat/json/getMongo`).then((res) => {
+  axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
+    // axios.get(`${domain}/chat/json/getMongo`).then((res) => {
     console.log(res.data);
     // MongoDB 연결 설정
     mongoose
@@ -128,6 +128,7 @@ ioo.on("connection", (socket) => {
     }
   });
 
+  //사용자가 채팅방에 접속해 있을경우 현재 존재하는 채팅들의 읽은사람 리스트에서 사용자를 추가
   socket.on("is read", async (res) => {
     const { room, user } = res;
     // console.log("back is read", res);
