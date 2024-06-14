@@ -264,5 +264,5 @@ app.post("/chatting/getAllMessages", async (req, res) => {
 
 // build index get????
 app.get("/chatting", (req, res) => {
-  res.sendFile(__dirname, "/build/index.html");
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
