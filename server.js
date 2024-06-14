@@ -261,3 +261,8 @@ app.post("/chatting/getAllMessages", async (req, res) => {
     console.error(error);
   }
 });
+
+// build index get????
+app.get("/chatting", (req, res) => {
+  res.sendFile(__dirname, "/build/index.html");
+});
