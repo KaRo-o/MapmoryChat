@@ -28,7 +28,8 @@ const ioo = new Server(server, {
 });
 
 // const socket = io("http://192.168.0.45:3001");
-const socket = io("https://mapmory.co.kr/socket.io");
+// const socket = io("https://mapmory.co.kr/socket.io");
+const socket = io("http://223.130.157.133:3001/socket.io");
 
 // CORS 미들웨어 설정
 app.use(cors());
