@@ -18,18 +18,17 @@ const ioo = new Server(server, {
       "http://localhost:8000",
       "http://192.168.0.24:3000",
       "http://192.168.0.24:8000",
-      "http:mapmory.co.kr",
-      "https:mapmory.co.kr",
+      "http://mapmory.co.kr",
+      "https://mapmory.co.kr",
     ],
     methods: ["GET", "POST"],
     credentials: true,
   },
-  path: "/socket.io",
 });
 
 // const socket = io("http://192.168.0.45:3001");
-// const socket = io("https://mapmory.co.kr/socket.io");
-const socket = io("http://223.130.157.133:3001/socket.io");
+const socket = io("https://mapmory.co.kr");
+// const socket = io("http://223.130.157.133:3001/socket.io");
 
 // CORS 미들웨어 설정
 app.use(cors());
@@ -126,7 +125,7 @@ ioo.on("connection", (socket) => {
 
   socket.on("is read", async (res) => {
     const { room, user } = res;
-    console.log("back is read", res);
+    // console.log("back is read", res);
     try {
       const isRead = await Message.updateMany(
         { chatId: room, readBy: { $ne: user } }, // 필터에 readBy 조건 추가
