@@ -262,7 +262,9 @@ app.post("/chatting/getAllMessages", async (req, res) => {
   }
 });
 
+app.use(express.static(path.join(__dirname, "build")));
+
 // build index get????
 app.get("/*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
+  console.log(res.sendFile(path.join(__dirname, "build", "index.html")));
 });
