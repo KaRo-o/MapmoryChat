@@ -8,7 +8,7 @@ const { io } = require("socket.io-client");
 const path = require("path");
 
 //push 할때는 domain으로 변경할것 (근데 밑에 8000번 포트인곳은 따로 해줘야함)
-// const domain = "https://mapmory.co.kr";
+const domain = "https://mapmory.co.kr";
 // const domain = "http://192.168.0.45:3001";
 
 const app = express();
@@ -30,8 +30,8 @@ const ioo = new Server(server, {
   },
 });
 
-// const socket = io("https://mapmory.co.kr");
-const socket = io("http://192.168.0.45:3001");
+const socket = io("https://mapmory.co.kr");
+// const socket = io("http://192.168.0.45:3001");
 
 // CORS 미들웨어 설정
 app.use(cors());
@@ -41,8 +41,8 @@ app.use(express.json()); // JSON 바디 파싱
 app.use(express.static(path.join(__dirname, "build")));
 
 (function async() {
-  axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
-    // axios.get(`${domain}/chat/json/getMongo`).then((res) => {
+  // axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
+  axios.get(`${domain}/chat/json/getMongo`).then((res) => {
     console.log(res.data);
     // MongoDB 연결 설정
     mongoose
