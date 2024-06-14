@@ -18,8 +18,8 @@ const Chat = () => {
   const axiosGetUser = async () => {
     try {
       const response = await axios.get(
-        // "http://192.168.0.45:8000/chat/json/getUser",
-        "https://mapmory.co.kr/chat/json/getUser",
+        "http://192.168.0.45:8000/chat/json/getUser",
+        // "https://mapmory.co.kr/chat/json/getUser",
         {
           withCredentials: true,
         }
@@ -148,8 +148,8 @@ const Chat = () => {
     try {
       const response = await axios
         .post(
-          // "http://192.168.0.45:8000/chat/json/addChatImage",
-          "https://mapmory.co.kr/chat/json/addChatImage",
+          "http://192.168.0.45:8000/chat/json/addChatImage",
+          // "https://mapmory.co.kr/chat/json/addChatImage",
           formData,
           config
         )
