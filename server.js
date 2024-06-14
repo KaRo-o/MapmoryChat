@@ -7,6 +7,10 @@ const { default: axios } = require("axios");
 const { io } = require("socket.io-client");
 const path = require("path");
 
+//push 할때는 domain으로 변경할것 (근데 밑에 8000번 포트인곳은 따로 해줘야함)
+// const domain = "https://mapmory.co.kr";
+// const domain = "http://192.168.0.45:3001";
+
 const app = express();
 const server = http.createServer(app);
 const ioo = new Server(server, {
@@ -26,9 +30,8 @@ const ioo = new Server(server, {
   },
 });
 
-// const socket = io("http://192.168.0.45:3001");
-const socket = io("https://mapmory.co.kr");
-// const socket = io("http://223.130.157.133:3001/socket.io");
+// const socket = io("https://mapmory.co.kr");
+const socket = io("http://192.168.0.45:3001");
 
 // CORS 미들웨어 설정
 app.use(cors());
@@ -38,8 +41,8 @@ app.use(express.json()); // JSON 바디 파싱
 app.use(express.static(path.join(__dirname, "build")));
 
 (function async() {
-  // axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
-  axios.get("https://mapmory.co.kr/chat/json/getMongo").then((res) => {
+  axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
+    // axios.get(`${domain}/chat/json/getMongo`).then((res) => {
     console.log(res.data);
     // MongoDB 연결 설정
     mongoose
@@ -96,12 +99,14 @@ ioo.on("connection", (socket) => {
   // console.log("connected");
 
   //채팅방 만들기
-  socket.on("make room", async (roomData) => {
+  socket.on("make room", async (roomData, callback) => {
     roomData.lastMessage = { text: null, timestamp: null };
     const newRoom = new Chat(roomData);
     try {
       console.log("make room try");
-      await newRoom.save();
+      const result = await newRoom.save();
+      console.log(result.id);
+      callback(result.id);
     } catch (error) {
       console.error(error);
     }
@@ -197,18 +202,28 @@ app.post("/chatting/findOneChatRoom", async (req, res) => {
       opponentChatRoomStrings.includes(room)
     );
     console.log("chatRoom : ", chatRoom);
-    res.json(chatRoom[0]);
+
     if (chatRoom[0] === undefined) {
       console.log("채팅방 없음");
       try {
-        socket.emit("make room", {
-          participants: [userId, opponent],
-        });
+        console.log("makeroom emit");
+
+        socket.emit(
+          "make room",
+          {
+            participants: [userId, opponent],
+          },
+          (result) => {
+            console.log("result: ", result);
+            res.json(result);
+          }
+        );
       } catch (error) {
         console.error(error);
       }
     } else {
       console.log("채팅방 존재");
+      res.json(chatRoom[0]);
     }
   } catch (error) {
     console.error(error);
@@ -219,9 +234,10 @@ app.post("/chatting/findOneChatRoom", async (req, res) => {
 app.post("/chatting/makeChatRoom", async (req, res) => {
   const { userId, opponent } = req.body;
   try {
-    socket.emit("make room", {
+    const result = socket.emit("make room", {
       participants: [userId, opponent],
     });
+    return result;
   } catch (error) {
     console.error(error);
   }

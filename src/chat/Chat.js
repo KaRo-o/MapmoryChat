@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 
-const socket = io("http://192.168.0.45:3001"); // 서버 주소 확인
-// const socket = io("https://mapmory.co.kr"); // 서버 주소 확인
+// const socket = io("http://192.168.0.45:3001"); // 서버 주소 확인
+const socket = io("https://mapmory.co.kr"); // 서버 주소 확인
 
 const Chat = () => {
   const { chat_room_id } = useParams();

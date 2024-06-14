@@ -18,7 +18,7 @@ const ChatList = () => {
   const axiosGetChatList = async (user) => {
     try {
       await axios
-        .post("http://192.168.0.45:3001/mongo/chatRoomList", {
+        .post("http://192.168.0.45:3001/chatting/chatRoomList", {
           // .post("https://mapmory.co.kr/chatting/chatRoomList", {
           userId: user,
         })
