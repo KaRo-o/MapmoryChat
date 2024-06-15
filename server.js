@@ -4,12 +4,8 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const { default: axios } = require("axios");
-const { io } = require("socket.io-client");
 const path = require("path");
-
-//push 할때는 domain으로 변경할것 (근데 밑에 8000번 포트인곳은 따로 해줘야함)
-const domain = "https://mapmory.co.kr";
-// const domain = "http://192.168.0.45:3001";
+const { io } = require("socket.io-client");
 
 const app = express();
 const server = http.createServer(app);
@@ -33,30 +29,20 @@ const ioo = new Server(server, {
 const socket = io("https://mapmory.co.kr");
 // const socket = io("http://192.168.0.45:3001");
 
-// CORS 미들웨어 설정
 app.use(cors());
-app.use(express.json()); // JSON 바디 파싱
-
-// React 빌드 파일을 정적 파일로 서빙
+app.use(express.json());
 app.use(express.static(path.join(__dirname, "build")));
 
-(function async() {
-  axios.get("http://192.168.0.45:8000/chat/json/getMongo").then((res) => {
-    // axios.get(`${domain}/chat/json/getMongo`).then((res) => {
-    console.log(res.data);
-    // MongoDB 연결 설정
-    mongoose
-      .connect(res.data, {
-        // useNewUrlParser: true,
-        // useUnifiedTopology: true,
-      })
-      .then(() => {
-        console.log("MongoDB connected...");
-      })
-      .catch((err) => {
-        console.error("MongoDB connection error: ", err);
-      });
-  });
+(async () => {
+  try {
+    const response = await axios.get(
+      "http://192.168.0.45:8000/chat/json/getMongo"
+    );
+    await mongoose.connect(response.data);
+    console.log("MongoDB connected...");
+  } catch (err) {
+    console.error("MongoDB connection error: ", err);
+  }
 })();
 
 const timeKR = () => {
@@ -69,9 +55,9 @@ const messageSchema = new mongoose.Schema({
   chatId: String,
   senderId: String,
   text: String,
-  imageUrl: String, // 이미지 메시지의 URL (이미지 메시지인 경우)
+  imageUrl: String,
   timestamp: { type: Date, default: timeKR },
-  readBy: [String], // 읽은 사용자 아이디
+  readBy: [String],
 });
 
 const chatSchema = new mongoose.Schema({
@@ -82,7 +68,7 @@ const chatSchema = new mongoose.Schema({
   },
   unreadCount: {
     type: Map,
-    of: Number, // 각 사용자별 읽지 않은 메시지 수
+    of: Number,
   },
 });
 
@@ -94,9 +80,8 @@ const User = mongoose.model("User", userSchema);
 const Message = mongoose.model("Message", messageSchema);
 const Chat = mongoose.model("Chat", chatSchema);
 
-//socket.io-client
 ioo.on("connection", (socket) => {
-  // console.log("connected");
+  console.log("connected");
 
   //채팅방 만들기
   socket.on("make room", async (roomData, callback) => {
@@ -114,14 +99,20 @@ ioo.on("connection", (socket) => {
 
   //채팅방 입장
   socket.on("joinChat", async (res) => {
-    // console.log("join", res);
     const { room, user } = res;
     socket.join(room);
     console.log(`joined room: ${room},${user}`);
 
     try {
+      const count = await countUnreadMessages(user, room);
+      console.log("unreadcount", count);
+      const readCount = await Chat.updateOne(
+        { _id: room },
+        { $set: { [`unreadCount.${user}`]: count } }
+      );
+      console.log(readCount);
       socket.emit("is read", { room, user });
-      const messages = await Message.find({ chat_room_id: room });
+      const messages = await Message.find({ chatId: room });
       socket.emit("previousMessages", messages);
     } catch (error) {
       console.error(error);
@@ -131,10 +122,9 @@ ioo.on("connection", (socket) => {
   //사용자가 채팅방에 접속해 있을경우 현재 존재하는 채팅들의 읽은사람 리스트에서 사용자를 추가
   socket.on("is read", async (res) => {
     const { room, user } = res;
-    // console.log("back is read", res);
     try {
-      const isRead = await Message.updateMany(
-        { chatId: room, readBy: { $ne: user } }, // 필터에 readBy 조건 추가
+      await Message.updateMany(
+        { chatId: room, readBy: { $ne: user } },
         { $addToSet: { readBy: user } }
       );
     } catch (error) {
@@ -145,22 +135,19 @@ ioo.on("connection", (socket) => {
   // 채팅 메시지 저장
   socket.on("chat message", async (msg) => {
     const message = new Message(msg);
-    // console.log(msg);
     try {
       await message.save().then(async (res) => {
-        ioo.emit("chat message", res);
-        // console.log(res);
         const lastMessage = await Chat.findById(res.chatId).exec();
-        // console.log(lastMessage);
         let text;
         if (res.text !== null) {
           text = res.text;
         } else if (res.imageUrl !== null) {
           text = "이미지";
         }
-        lastMessage.lastMessage = { text: text, timestamp: res.timestamp };
+        lastMessage.lastMessage = { text, timestamp: res.timestamp };
         await lastMessage.save();
-        ioo.emit("get chat list", res.senderId);
+        ioo.emit("chat message", res); // 메시지 이벤트 트리거
+        ioo.emit("get chat list", res.senderId); // 전체 채팅 리스트 갱신
       });
     } catch (error) {
       console.error(error);
@@ -173,7 +160,7 @@ ioo.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    // console.log("user disconnected");
+    console.log("user disconnected");
   });
 });
 
@@ -211,9 +198,7 @@ app.post("/chatting/findOneChatRoom", async (req, res) => {
 
         socket.emit(
           "make room",
-          {
-            participants: [userId, opponent],
-          },
+          { participants: [userId, opponent] },
           (result) => {
             console.log("result: ", result);
             res.json(result);
@@ -248,20 +233,25 @@ app.post("/chatting/makeChatRoom", async (req, res) => {
 app.post("/chatting/chatRoomList", async (req, res) => {
   const { userId } = req.body;
   try {
-    const chatRoomList = await Chat.find({ participants: userId });
-    // console.log(userId, "의 채팅방 목록", chatRoomList);
-
-    const result = chatRoomList.map((chat) => {
-      const filter = chat.participants.filter(
-        (participants) => participants !== userId
-      );
-      return {
-        ...chat.toObject(),
-        participants: filter,
-      };
+    // 채팅방을 마지막 메시지의 타임스탬프를 기준으로 내림차순 정렬하여 가져옴
+    const chatRoomList = await Chat.find({ participants: userId }).sort({
+      "lastMessage.timestamp": -1,
     });
-    // console.log(userId, "의 채팅방 목록중 상대만 아이디만 포함 : ", result);
 
+    const result = await Promise.all(
+      chatRoomList.map(async (chat) => {
+        // 안읽은 메시지 개수 설정
+        const count = await countUnreadMessages(userId, chat._id);
+        const filter = chat.participants.filter(
+          (participant) => participant !== userId
+        );
+        return {
+          ...chat.toObject(),
+          participants: filter,
+          unreadCount: { [userId]: count },
+        };
+      })
+    );
     res.json(result);
   } catch (error) {
     console.error(error);
@@ -279,7 +269,22 @@ app.post("/chatting/getAllMessages", async (req, res) => {
   }
 });
 
-// build index get????
+// build index get
 app.get("/chatting", (req, res) => {
   console.log(res.sendFile(path.join(__dirname, "build", "index.html")));
 });
+
+// 안읽은 메시지 개수세기
+async function countUnreadMessages(userId, chatId) {
+  try {
+    const unreadMessagesCount = await Message.countDocuments({
+      chatId: chatId,
+      readBy: { $ne: userId },
+    });
+
+    return unreadMessagesCount;
+  } catch (error) {
+    console.error("Error counting unread messages:", error);
+    throw error;
+  }
+}
