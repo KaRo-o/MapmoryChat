@@ -288,3 +288,15 @@ async function countUnreadMessages(userId, chatId) {
     throw error;
   }
 }
+
+// 상대방 아이디 설정용
+app.post("/chatting/getOpponent", async (req, res) => {
+  const { chat_room_id, userId } = req.body;
+  const chat = await Chat.findById(chat_room_id);
+
+  const opponentId = chat.participants.find(
+    (participant) => participant !== userId
+  );
+
+  res.json(opponentId);
+});
