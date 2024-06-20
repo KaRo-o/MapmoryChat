@@ -26,8 +26,8 @@ const ioo = new Server(server, {
   },
 });
 
-const socket = io("https://mapmory.co.kr");
-// const socket = io("http://192.168.0.45:3001");
+// const socket = io("https://mapmory.co.kr");
+const socket = io("http://192.168.0.45:3001");
 
 app.use(cors());
 app.use(express.json());
@@ -36,7 +36,12 @@ app.use(express.static(path.join(__dirname, "build")));
 (async () => {
   try {
     const response = await axios.get(
+      // "http://192.168.0.45:8000/chat/json/getMongo"
       "http://192.168.0.45:8000/chat/json/getMongo"
+    );
+    console.log(
+      "=======================================================",
+      response.data
     );
     await mongoose.connect(response.data);
     console.log("MongoDB connected...");
