@@ -300,3 +300,9 @@ app.post("/chatting/getOpponent", async (req, res) => {
 
   res.json(opponentId);
 });
+
+app.post("/chatting/removeChatRoom", async (req, res) => {
+  const { chat_room_id } = req.body;
+  await Chat.deleteOne({ _id: chat_room_id });
+  await Message.deleteMany({ chatId: chat_room_id });
+});
