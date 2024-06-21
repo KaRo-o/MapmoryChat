@@ -307,8 +307,18 @@ app.post("/chatting/getOpponent", async (req, res) => {
 });
 
 app.post("/chatting/removeChatRoom", async (req, res) => {
-  const { chat_room_id } = req.body;
-  await Chat.deleteOne({ _id: chat_room_id });
-  await Message.deleteMany({ chatId: chat_room_id });
-  return null;
+  try {
+    const { chat_room_id } = req.body;
+    await Chat.deleteOne({ _id: chat_room_id });
+    await Message.deleteMany({ chatId: chat_room_id });
+
+    res
+      .status(200)
+      .json({ success: true, message: "Chat room deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to delete chat room" });
+  }
 });
