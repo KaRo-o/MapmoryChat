@@ -176,7 +176,7 @@ server.listen(3001, () => {
 
 //채팅방 있는지 조회 후 없으면 채팅방 생성
 app.post("/chatting/findOneChatRoom", async (req, res) => {
-  const { userId, opponent } = req.body;
+  const { userId, opponent, nickname, profileImageName } = req.body;
   console.log(userId, " : ", opponent);
   try {
     const userChatRoom = await Chat.find({ participants: userId }).distinct(
@@ -205,8 +205,9 @@ app.post("/chatting/findOneChatRoom", async (req, res) => {
           "make room",
           { participants: [userId, opponent] },
           (result) => {
-            console.log("result: ", result);
-            res.json(result);
+            let queryParam = result + "/" + nickname + "/" + profileImageName;
+            console.log("result: ", queryParam);
+            res.json(queryParam);
           }
         );
       } catch (error) {
@@ -214,7 +215,8 @@ app.post("/chatting/findOneChatRoom", async (req, res) => {
       }
     } else {
       console.log("채팅방 존재");
-      res.json(chatRoom[0]);
+      let queryParam = chatRoom[0] + "/" + nickname + "/" + profileImageName;
+      res.json(queryParam);
     }
   } catch (error) {
     console.error(error);
