@@ -26,8 +26,8 @@ const ioo = new Server(server, {
   },
 });
 
-const socket = io("https://mapmory.co.kr");
-// const socket = io("http://192.168.0.45:3001");
+// const socket = io("https://mapmory.co.kr");
+const socket = io("http://192.168.0.45:3001");
 
 app.use(cors());
 app.use(express.json());
