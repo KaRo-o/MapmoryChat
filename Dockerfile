@@ -16,6 +16,7 @@ COPY package*.json ./
 RUN npm install --production
 
 COPY server.js ./
+COPY build /usr/src/app/build
 
 EXPOSE 3001
 
