@@ -6,6 +6,7 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
 RUN npm run build
 
 FROM node:14-alpine
@@ -16,7 +17,7 @@ COPY package*.json ./
 RUN npm install --production
 
 COPY server.js ./
-COPY build /usr/src/app/build
+COPY --from=build /usr/src/app/build /usr/src/app/build
 
 EXPOSE 3001
 
