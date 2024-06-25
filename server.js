@@ -28,8 +28,8 @@ const ioo = new Server(server, {
   },
 });
 
-const socket = io("https://www.uaena.shop");
-// const socket = io("https://mapmory.co.kr");
+// const socket = io("https://www.uaena.shop");
+const socket = io("https://mapmory.co.kr");
 // const socket = io("http://192.168.0.45:3001");
 
 app.use(cors());
@@ -40,8 +40,8 @@ app.use(express.static(path.join(__dirname, "build")));
   try {
     const response = await axios.get(
       // "http://192.168.0.45:8000/chat/json/getMongo"
-      "https://www.uaena.shop/chat/json/getMongo"
-      // "https:mapmory.co.kr/chat/json/getMongo"
+      // "https://www.uaena.shop/chat/json/getMongo"
+      "https:mapmory.co.kr/chat/json/getMongo"
     );
     console.log(
       "=======================================================",
@@ -160,6 +160,7 @@ ioo.on("connection", (socket) => {
         await lastMessage.save();
         ioo.emit("chat message", res); // 메시지 이벤트 트리거
         ioo.emit("get chat list", res.senderId); // 전체 채팅 리스트 갱신
+        ioo.emit("getAllUnreadCount");
       });
     } catch (error) {
       console.error(error);
@@ -332,5 +333,22 @@ app.post("/chatting/removeChatRoom", async (req, res) => {
   }
 });
 
-//asdfds
-//kjfskfjldjlksjfkjdsal
+//읽지않은 메시지의 전체개수 세기 (floating button에 추가해줄 기능)
+async function countAllUnreadMessages(userId) {
+  try {
+    const allUnreadMessageCount = await Message.countDocuments({
+      readBy: { $ne: userId },
+    });
+
+    return allUnreadMessageCount;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+app.post("/chatting/countAllUnreadMessges", async (req, res) => {
+  const { userId } = req.body;
+  const result = await countAllUnreadMessages(userId);
+  console.log(result);
+  res.json(result);
+});
