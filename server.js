@@ -28,8 +28,8 @@ const ioo = new Server(server, {
   },
 });
 
-// const socket = io("https://www.uaena.shop");
-const socket = io("https://mapmory.co.kr");
+const socket = io("https://www.uaena.shop");
+// const socket = io("https://mapmory.co.kr");
 // const socket = io("http://192.168.0.45:3001");
 
 app.use(cors());
