@@ -28,8 +28,8 @@ const ioo = new Server(server, {
   },
 });
 
-const socket = io("https://www.uaena.shop");
-// const socket = io("https://mapmory.co.kr");
+// const socket = io("https://www.uaena.shop");
+const socket = io("https://mapmory.co.kr");
 // const socket = io("http://192.168.0.45:3001");
 
 app.use(cors());
@@ -39,9 +39,9 @@ app.use(express.static(path.join(__dirname, "build")));
 (async () => {
   try {
     const response = await axios.get(
-      // "http://192.168.0.45:8000/chat/json/getMongo"
+      // "http://192.168.0.45:8000/chat/rest/json/getMongo"
       // "https://www.uaena.shop/chat/json/getMongo"
-      "https:mapmory.co.kr/chat/json/getMongo"
+      "https:mapmory.co.kr/chat/rest/json/getMongo"
     );
     console.log(
       "=======================================================",
@@ -111,19 +111,19 @@ ioo.on("connection", (socket) => {
 
   //채팅방 입장
   socket.on("joinChat", async (res) => {
-    const { room, user } = res;
+    const { room, userId } = res;
     socket.join(room);
-    console.log(`joined room: ${room},${user}`);
+    console.log(`joined room: ${room},${userId}`);
 
     try {
-      const count = await countUnreadMessages(user, room);
+      const count = await countUnreadMessages(userId, room);
       console.log("unreadcount", count);
       const readCount = await Chat.updateOne(
         { _id: room },
-        { $set: { [`unreadCount.${user}`]: count } }
+        { $set: { [`unreadCount.${userId}`]: count } }
       );
       console.log(readCount);
-      socket.emit("is read", { room, user });
+      socket.emit("is read", { room, userId });
       const messages = await Message.find({ chatId: room });
       socket.emit("previousMessages", messages);
     } catch (error) {
