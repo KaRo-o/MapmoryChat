@@ -29,8 +29,8 @@ const ioo = new Server(server, {
 });
 
 // const socket = io("https://www.uaena.shop");
-const socket = io("https://mapmory.co.kr");
-// const socket = io("http://192.168.0.45:3001");
+// const socket = io("https://mapmory.co.kr");
+const socket = io("http://192.168.0.45:3001");
 
 app.use(cors());
 app.use(express.json());
@@ -39,9 +39,9 @@ app.use(express.static(path.join(__dirname, "build")));
 (async () => {
   try {
     const response = await axios.get(
-      // "http://192.168.0.45:8000/chat/rest/json/getMongo"
+      "http://192.168.0.45:8000/chat/rest/json/getMongo"
       // "https://www.uaena.shop/chat/rest/json/getMongo"
-      "https:mapmory.co.kr/chat/rest/json/getMongo"
+      // "https:mapmory.co.kr/chat/rest/json/getMongo"
     );
     console.log(
       "=======================================================",
@@ -246,6 +246,7 @@ app.post("/chatting/makeChatRoom", async (req, res) => {
 
 //현재 로그인한 유저의 채팅방 리스트 조회
 app.post("/chatting/chatRoomList", async (req, res) => {
+  console.log("ads");
   const { userId } = req.body;
   try {
     // 채팅방을 마지막 메시지의 타임스탬프를 기준으로 내림차순 정렬하여 가져옴
@@ -352,5 +353,3 @@ app.post("/chatting/countAllUnreadMessges", async (req, res) => {
   console.log(result);
   res.json(result);
 });
-
-//sasd
