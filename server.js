@@ -29,8 +29,8 @@ const ioo = new Server(server, {
 });
 
 // const socket = io("https://www.uaena.shop");
-// const socket = io("https://mapmory.co.kr");
-const socket = io("http://192.168.0.45:3001");
+const socket = io("https://mapmory.co.kr");
+// const socket = io("http://192.168.0.45:3001");
 
 app.use(cors());
 app.use(express.json());
@@ -39,9 +39,9 @@ app.use(express.static(path.join(__dirname, "build")));
 (async () => {
   try {
     const response = await axios.get(
-      "http://192.168.0.45:8000/chat/rest/json/getMongo"
+      // "http://192.168.0.45:8000/chat/rest/json/getMongo"
       // "https://www.uaena.shop/chat/rest/json/getMongo"
-      // "https:mapmory.co.kr/chat/rest/json/getMongo"
+      "https:mapmory.co.kr/chat/rest/json/getMongo"
     );
     console.log(
       "=======================================================",
