@@ -336,8 +336,13 @@ app.post("/chatting/removeChatRoom", async (req, res) => {
 
 //읽지않은 메시지의 전체개수 세기 (floating button에 추가해줄 기능)
 async function countAllUnreadMessages(userId) {
+  const userChatRooms = await Chat.find({ participants: userId }).distinct(
+    "_id"
+  );
+
   try {
     const allUnreadMessageCount = await Message.countDocuments({
+      chatId: { $in: userChatRooms },
       readBy: { $ne: userId },
     });
 
